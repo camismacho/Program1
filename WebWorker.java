@@ -51,6 +51,8 @@ import java.util.TimeZone;
     {
     	//this is the address which will point to the file
     	String url = "";
+    	//represent content type (text, jpg, etc.)
+    	String cType = ""; 
         
         System.err.println("Handling connection...");
         try {
@@ -60,9 +62,22 @@ import java.util.TimeZone;
             url = readHTTPRequest(is);
             System.err.println("HTTP Request: " + url);
             
-            //pass the url to write functions
-            writeHTTPHeader(os, "text/html", url);  
-            writeContent(os, "text/html", url);
+            //first check the file type
+            //jpeg
+            if (url.contains(".jpg")) cType = "image/jpeg";
+            //png
+            else if (url.contains(".png")) cType = "image/png";
+            //gif
+            else if (url.contains(".gif")) cType = "image/gif";
+            //ico
+            //I don't think it works but I gave it the old college try
+            else if (url.contains(".ico")) cType = "image/x-icon";
+            //if no image type found, set to default case of text/html
+            else cType = "text/html";
+            
+            //now we can pass cType to the write functions
+            writeHTTPHeader(os, cType, url);  
+            writeContent(os, cType, url);
             os.flush();
             socket.close();
         } catch (Exception e) {
@@ -88,9 +103,9 @@ import java.util.TimeZone;
                 line = r.readLine();
                 //if there is a GET request, read url for file address
                 if (line.contains("GET ")) {
-                	//create a substring that excludes http
+                	//create a substring that excludes 'http'
                     url = line.substring(4);
-                    //get rid of whitespace
+                    //get rid of whitespace if there is any
                     for(int i = 0; i < url.length(); i++) {
                         if (url.charAt(i) == ' ')
                             url = url.substring(0 , i);
@@ -114,10 +129,11 @@ import java.util.TimeZone;
     **/
     private void writeHTTPHeader(OutputStream os, String contentType, String url) throws Exception
     {
+        //date formatting
         Date d = new Date();
         DateFormat df = DateFormat.getDateTimeInstance();
         df.setTimeZone( TimeZone.getTimeZone("GMT-6") );
-        //creates a copy of the file address with a "." at the front for proper reading
+        //creates a copy of the file address with "." at the front for proper reading
         String urlCopy = "." + url;
         //create new file pointing to urlCopy
         File in = new File(urlCopy);
@@ -125,7 +141,6 @@ import java.util.TimeZone;
         //if file doesn't exist throw 404
         try {
             FileReader file = new FileReader(in);
-            BufferedReader r = new BufferedReader(file);
         } catch(FileNotFoundException e) {
             System.err.println("File not found: " + url);
             os.write("HTTP/1.1 404 Not Found\n".getBytes());
@@ -138,6 +153,8 @@ import java.util.TimeZone;
         os.write("Server: Joseph's very own server\n".getBytes());
         os.write("Connection: close\n".getBytes());
         os.write("Content-Type: ".getBytes());
+        /*DEBUG*/
+        //System.err.println("Content Type at Header: " + contentType);
         os.write(contentType.getBytes());
         os.write("\n\n".getBytes()); // HTTP header ends with 2 newlines
         return;
@@ -161,28 +178,56 @@ import java.util.TimeZone;
         String urlCopy = "." + url;
         //new file at urlCopy
         File in = new File(urlCopy);
+        
+        /*DEBUG*/
+        //System.err.println("Content Type at Write: " + contentType);
 
         //read contents of file and place into fileContent
-        try{
-        	FileReader f = new FileReader(in);
-            BufferedReader r = new BufferedReader(f);
-            while((fileContent = r.readLine()) != null) {
-            	os.write(fileContent.getBytes());
-                	os.write("\n".getBytes());
-                	//if tags are found, replace with date or message
-                    if (fileContent.contains("<cs371date>")) {
-                        os.write(date.getBytes());
-                    }
-                    if (fileContent.contains("<cs371server>"))
-                        os.write("Generic Server Name\n".getBytes());
-            }    
-        } 
-        //if file doesn't exist, throw 404
-        catch(FileNotFoundException e) {
-                System.err.println("File not found: " + url);
-                os.write("<h1>Error: 404 Not found<h1>\n".getBytes());
-            }
+        //for p2 we change to if statement to handle multiple types
         
-    }
+        //process text files
+        if (contentType.equals("text/html")) {
+	        try{
+	        	FileReader f = new FileReader(in);
+	            BufferedReader r = new BufferedReader(f);
+	            while((fileContent = r.readLine()) != null) {
+	            	os.write(fileContent.getBytes());
+	                	os.write("\n".getBytes());
+	                	//if tags are found, replace with date or message
+	                    if (fileContent.contains("<cs371date>")) {
+	                        os.write(date.getBytes());
+	                    }//end if
+	                    if (fileContent.contains("<cs371server>")) {
+	                        os.write("Sweet Server M8\n".getBytes());
+	        			}//end if
+	            }//end while
+	        }//end try 
+	        //if file doesn't exist, throw 404
+	        catch(FileNotFoundException e) {
+	                System.err.println("File not found: " + url);
+	                os.write("<h1>Error: 404 Not found<h1>\n".getBytes());
+	        }//end catch
+        }// end if
+        
+        //if we don't get a text file right away, we'll try images
+        //using .contains, so we don't have to .equals every type
+        else if (contentType.contains("image")) {
+        	try {
+                FileInputStream imgIn = new FileInputStream(in);
+                //create byte array to store image data
+        		byte imgArr[] = new byte [(int) in.length()];
+                imgIn.read(imgArr);
+                //write image to output stream
+        		DataOutputStream imgOut = new DataOutputStream(os);
+        		imgOut.write(imgArr);
+        	}//end try
+        	//if file doesn't exist, throw 404
+	        catch(FileNotFoundException e) {
+	                System.err.println("File not found: " + url);
+	                os.write("<h1>Error: 404 Not found<h1>\n".getBytes());
+	        }//end catch
+        }//end if
+        
+    }//end writeContent
 
 } // end class

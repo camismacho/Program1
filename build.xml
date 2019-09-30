@@ -4,4 +4,8 @@
 		<javac srcdir = "." includeantruntime = "false"/>
 	</target>
 
+	<target name = "run" depends = "compile">
+		<java classname = "WebServer" fork = "true"/>
+	</target>
+
 </project>
