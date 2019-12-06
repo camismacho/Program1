@@ -14,6 +14,7 @@
 	<arg value = "1"/>
 	</java>
 </target>
+
 <target name="clean">
 	<delete>
 	<fileset dir="." includes="*.class"/>

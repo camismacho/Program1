@@ -26,9 +26,9 @@ public class Circle1Test
 public void setup()
 {
    System.out.println("\nTest starting...");
-   circle1 = new Circle1(1,2,3);
-   circle2 = new Circle1(1,3,4);
-   circle3 = new Circle1(50,60,8);
+   circle1 = new Circle1(2,3,4);
+   circle2 = new Circle1(2,3,5);
+   circle3 = new Circle1(100,50,10);
 }
 
 //
@@ -49,7 +49,7 @@ public void simpleMove()
    Point p;
    System.out.println("Running test simpleMove");
    p = circle1.moveBy(1,1);
-   Assert.assertTrue(p.x == 2 && p.y == 3);
+   Assert.assertTrue(p.x == 3 && p.y == 4);
 }
 
 // 
@@ -61,7 +61,7 @@ public void simpleMoveNeg()
    Point p;
    System.out.println("Running test simpleMoveNeg");
    p = circle1.moveBy(-1,-1);
-   Assert.assertTrue(p.x == 0 && p.y == 1);
+   Assert.assertTrue(p.x == 1 && p.y == 2);
 }
 
 // 
@@ -71,7 +71,7 @@ public void simpleMoveNeg()
 public void scalePositive()
 {
    System.out.println("Running test scalePositive");
-   Assert.assertTrue(circle1.scale(10) == 30);
+   Assert.assertTrue(circle1.scale(10) == 40);
 }
 
 // 
@@ -81,7 +81,7 @@ public void scalePositive()
 public void scaleNegative()
 {
    System.out.println("Running test scaleNegative");
-   Assert.assertTrue(circle2.scale(0.5) == 2);
+   Assert.assertTrue(circle2.scale(0.5) == 2.5);
 }
 
 // 
