@@ -1,5 +1,4 @@
 # Program1
-Simple Java Web Server for CS 371
 
 P1:
 The P1 folder contains a Simple Web Server assignment written in Java. 
